@@ -1,4 +1,5 @@
-import builder
+#!/usr/bin/env python3
+import hopper_builder as builder
 
 
 def main():

@@ -1,0 +1,5 @@
+settings:
+    project: "~/Documents/StreetHopper"
+    config:  "~/Documents/StreetHopper/config.yml"
+
+modules: 
