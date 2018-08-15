@@ -2,15 +2,24 @@
 
 from typing import Dict, Any
 import os
-from pathlib import Path
 import shutil
 import argparse
+import shlex
+import subprocess
 import yaml
 
-import pprint
+from pprint import pprint
+
 
 DEFAULT_CONF_PATH = os.path.expanduser("~/.config/builder.yml")
 DEFAULT_CONF_FILE = os.path.dirname(os.path.realpath(__file__)) + "/default_conf.yml"
+
+
+def set_env(base_path):
+    os.chdir(os.path.expanduser(base_path) + "/StreetHopper")
+    pprint(os.environ["PATH"])
+    os.environ["PATH"] = subprocess.check_output(shlex.split("bash settings64_Vivado_Linux.sh")).decode().split("\n")[1]
+    pprint(os.environ["PATH"])
 
 
 def get_conf() -> Dict:
@@ -24,6 +33,7 @@ def get_conf() -> Dict:
     dict
         A dictonary contaning settings
     """
+    # Create default file if missing
     if not os.path.isfile(DEFAULT_CONF_PATH):
         shutil.copyfile(DEFAULT_CONF_FILE, DEFAULT_CONF_PATH)
 
@@ -60,7 +70,9 @@ def parse_args() -> Any:
 
 def main() -> None:
     arguments = parse_args()
-    pprint.pprint(get_conf())
+    settings = get_conf()
+    print(settings["settings"]["project"] + "/" + settings["modules"][(arguments.module).upper()]["hwpath"])
+    set_env(settings["settings"]["project"] + "/" + settings["modules"][(arguments.module).upper()]["hwpath"])
 
 
 if __name__ == "__main__":
