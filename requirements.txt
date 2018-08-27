@@ -1,1 +1,2 @@
-yaml >= 3.13
+PyYAML >= 3.13
+progressbar2 >= 3.38
