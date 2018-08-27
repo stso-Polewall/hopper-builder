@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
 
-from Typing import Dict
-
 import logging
 import os
 import shutil
@@ -18,7 +16,7 @@ class Build(object):
             self.config = self._set_config()
 
     @staticmethod
-    def _set_config() -> Dict:
+    def _set_config():
         """Returns a settings dictonary
 
         It gets user and project settings and combine them.
@@ -60,23 +58,25 @@ class Build(object):
         # Merge user and project into class dictoanry
         class_dict['settings'] = user_dict['settings']
 
+        stmv = 'modules'
+        class_dict[stmv] = {}
         # Add modules from project
-        if "modules" in project_dict:
-            for module in project_dict.iterkeys():
-                for item in module.iterkeys():
-                    logger.debug("project_dict['modules']['{}']: {}".format(module, item))
-                    class_dict['modules'][module][item] = project_dict['modules'][module][item]
+        if stmv in project_dict:
+            for module, _ in project_dict[stmv].items():
+                for key, value in project_dict[stmv][module].items():
+                    logger.debug("project_dict[{}]['{}']: {}".format(stmv, module, key))
+                    class_dict[stmv][module] = project_dict[stmv][module]
 
         # Add/Update modules from user
-        if "modules" in user_dict:
-            for module in user_dict.iterkeys():
-                for item in module.iterkeys():
-                    logger.debug("user_dict['modules']['{}']: {}".format(module, item))
-                    class_dict['modules'][module][item] = user_dict['modules'][module][item]
+        if stmv in user_dict and user_dict[stmv]:
+            for module, _ in user_dict[stmv].items():
+                for key, _ in user_dict[stmv][module].items():
+                    logger.debug("user_dict[{}]['{}']: {}".format(stmv, module, key))
+                    class_dict[stmv][module] = user_dict[stmv][module]
 
-        
-        if "modules" in class_dict:
+        if class_dict[stmv]:
             logger.info("Done")
+            logger.debug("Returning: {}".format(class_dict))
             return class_dict
         else:
             # Modules missing, pointless to continue
