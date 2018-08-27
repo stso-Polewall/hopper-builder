@@ -1,0 +1,61 @@
+#!/usr/bin/env python3
+
+from typing import Any
+
+import logging
+import argparse
+
+import time
+import random
+
+import progressbar
+
+#from build import Build
+
+
+def parse_args() -> Any:
+    """parses arguments
+
+    Returns
+    -------
+    Args
+        Object contaning argument variables
+    """
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--clean', action="store_true")
+    parser.add_argument('--pull', action="store_true")
+    parser.add_argument('module')
+    return parser.parse_args()
+
+
+def main():
+    progressbar.streams.wrap_stderr()
+    logging.basicConfig(level=logging.INFO)
+    arguments = parse_args()
+    with progressbar.ProgressBar(max_value=4, redirect_stdout=True) as progress:
+        progress.update(0)
+        # ==========
+        logging.info("Seting env")
+        time.sleep(2)
+        progress += 1
+        # ===========
+        logging.info("Building HW")
+        time.sleep(2)
+        progress += 1
+        # ===========
+        logging.info("Building SW")
+        time.sleep(2)
+        progress += 1
+        # ===========
+        logging.info("Moving files")
+        time.sleep(2)
+        progress += 1
+        # ===========
+        logging.info("Finished!")
+        time.sleep(2)
+
+if __name__ == "__main__":
+    try:
+        main()
+    except KeyboardInterrupt:
+        quit()
