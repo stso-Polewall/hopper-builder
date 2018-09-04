@@ -8,6 +8,7 @@ import shlex
 import subprocess
 import shutil
 import yaml
+from pprint import pformat
 
 logger = logging.getLogger(__name__)
 
@@ -15,20 +16,33 @@ logger = logging.getLogger(__name__)
 class Build(object):
     config = {}
 
-    def __init__(self, module):
-        self.module = module
+    def __init__(self, module, verbose=False):
+        self.module = module.lower()
+        self.verbose = verbose
 
         # Set config if empty
         if not self.config:
-            self.config = self._set_config()
+            Build.config = self._set_config()
+
+        # Check if module exist
+        if self.module not in self.config['modules']:
+            logger.critical("Missing module: {}!".format(self.module))
+            self._list_modules()
+            exit(1)
 
         self._cwd_to_base()
+
+    def _list_modules(self):
+        modules = [*self.config['modules']]
+        modules.sort()
+        print("Available modules: {}".format(", ".join(modules).lower()))
+
 
     def _cwd_to_base(self):
         os.chdir(os.path.expanduser(self.config['settings']['project']))
         logger.debug("Setting cwd to {}".format(os.getcwd()))
 
-    def _proc_start(self, cmd, stdout=False, stderr=False) -> None:
+    def _proc_start(self, cmd) -> None:
         """Runs command with subprocess
 
         Raises
@@ -36,28 +50,21 @@ class Build(object):
         subprocess.CalledProcessError
             If process returns a non zero value
         """
-        if stdout:
-            stdout_redirect = None
+        if self.verbose:
+            stdout = None
         else:
-            logger.debug("Opening stdout_redirect to /dev/null")
-            stdout_redirect = open(os.devnull, 'w')
-        if stderr:
-            stderr_redirect = None
-        else:
-            logger.debug("Opening stderr_redirect to /dev/null")
-            stderr_redirect = open(os.devnull, 'w')
+            logger.debug("Opening stdout to /dev/null")
+            stdout = open(os.devnull, 'w')
+
         logger.debug("Running {}".format(cmd))
         try:
-            subprocess.run(shlex.split(cmd), check=True, stdout=stdout_redirect, stderr=stderr_redirect)
+            subprocess.run(shlex.split(cmd), check=True, stdout=stdout)
         except subprocess.CalledProcessError:
-             logger.error("\"{}\" subprocess failed!".format(cmd), exc_info=True)
-        
-        if stdout_redirect:
-            logger.debug("Closing stdout_redirect")
-            stdout_redirect.close()
-        if stderr_redirect:
-            logger.debug("Closing stderr_redirect")
-            stderr_redirect.close()
+            logger.error("\"{}\" subprocess failed!".format(cmd), exc_info=True)
+ 
+        if stdout:
+            logger.debug("Closing stdout")
+            stdout.close
 
     @staticmethod
     def _set_config():
@@ -109,18 +116,18 @@ class Build(object):
             for module, _ in project_dict[stmv].items():
                 for key, value in project_dict[stmv][module].items():
                     logger.debug("project_dict[{}]['{}']: {}".format(stmv, module, key))
-                    class_dict[stmv][module] = project_dict[stmv][module]
+                    class_dict[stmv][module.lower()] = project_dict[stmv][module]
 
         # Add/Update modules from user
         if stmv in user_dict and user_dict[stmv]:
             for module, _ in user_dict[stmv].items():
                 for key, _ in user_dict[stmv][module].items():
                     logger.debug("user_dict[{}]['{}']: {}".format(stmv, module, key))
-                    class_dict[stmv][module] = user_dict[stmv][module]
+                    class_dict[stmv][module.lower()] = user_dict[stmv][module]
 
         if class_dict[stmv]:
-            logger.info("Done")
-            logger.debug("Returning: {}".format(class_dict))
+            logger.debug("Config done")
+            logger.debug("Returning: {}".format('\n' + pformat(class_dict)))
             return class_dict
         else:
             # Modules missing, pointless to continue
@@ -129,8 +136,8 @@ class Build(object):
 
 
 class Hw(Build):
-    def __init__(self, module):
-        super().__init__(module)
+    def __init__(self, module, verbose=False):
+        super().__init__(module, verbose)
 
     def build_hw(self) -> None:
         logger.info("Starting Hardware Build")
@@ -165,7 +172,9 @@ class Hw(Build):
             return False
 
     def _set_env(self) -> None:
-        """Adds Vivado to PATH"""
+        """Adds Vivado to PATH
+        echo $PATH needs to be last line of settings64_Vivado_Linux.sh
+        """
         logger.debug("Setting envirotment PATH")
         os.environ["PATH"] = subprocess.check_output(
                              shlex.split("bash settings64_Vivado_Linux.sh")).decode().split("\n")[1]
@@ -173,8 +182,8 @@ class Hw(Build):
 
 
 class Sw(Build):
-    def __init__(self, module):
-        super().__init__(module)
+    def __init__(self, module, verbose=False):
+        super().__init__(module, verbose)
 
     def build_sw(self):
         logger.info("Starting Software Build")

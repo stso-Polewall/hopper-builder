@@ -37,36 +37,28 @@ def main():
     else:
         logging.basicConfig(format='%(message)s', level=logging.INFO)
 
-    with progressbar.ProgressBar(max_value=3, redirect_stdout=True) as progress:
-        progress.update(0)
-        time.sleep(2)
-        # =========================
-        logging.debug("Creating instance of Hw")
-        hw_build = Hw(arguments.module)
-        if hw_build.is_enabled():
-            hw_build.build_hw()
-        else:
-            logging.info("Hardware build skipped!")
+    logging.debug("Creating instance of Hw")
+    hw_build = Hw(arguments.module, arguments.verbose)
+    if hw_build.is_enabled():
+        hw_build.build_hw()
+    else:
+        logging.info("Hardware build skipped!")
 
-        logging.debug("Deleting instance of Hw")
-        del(hw_build)
-        progress += 1  # Finished Hw
-        # =========================
-        logging.debug("Creating instance for Sw")
-        sw_build = Sw(arguments.module)
-        if sw_build.is_enabled():
-            sw_build.build_sw()
-        else:
-            logging.info("Software build skipped!")
+    logging.debug("Deleting instance of Hw")
+    del(hw_build)
+    # =========================
+    logging.debug("Creating instance for Sw")
+    sw_build = Sw(arguments.module, arguments.verbose)
+    if sw_build.is_enabled():
+        sw_build.build_sw()
+    else:
+        logging.info("Software build skipped!")
 
-        logging.debug("Deleting instance of Sw")
-        del(sw_build)
-        progress += 1  # Finished Sw
-        # =========================
-        logging.info("Build Finished!")
-        progress += 1  # Increment one last time
-        time.sleep(2)
-        # =========================
+    logging.debug("Deleting instance of Sw")
+    del(sw_build)
+    # =========================
+    logging.info("Build Finished!")
+    # =========================
     
         
 
