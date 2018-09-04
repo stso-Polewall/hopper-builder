@@ -28,7 +28,7 @@ class Build(object):
         os.chdir(os.path.expanduser(self.config['settings']['project']))
         logger.debug("Setting cwd to {}".format(os.getcwd()))
 
-    def _proc_start(self, cmd) -> None:
+    def _proc_start(self, cmd, stdout=False, stderr=False) -> None:
         """Runs command with subprocess
 
         Raises
@@ -36,26 +36,28 @@ class Build(object):
         subprocess.CalledProcessError
             If process returns a non zero value
         """
-        logger.debug("Running {}".format(cmd))
-
-        # NOTE: Default false to limit as cpulimit always returns 0
-        if "limit" in self.config['settings']:
-            if self.config['settings']['limit']:
-                limit = True
-            else:
-                limit = False
+        if stdout:
+            stdout_redirect = None
         else:
-            limit = False
-
-        logger.debug("Limit: {}".format(limit))
-
+            logger.debug("Opening stdout_redirect to /dev/null")
+            stdout_redirect = open(os.devnull, 'w')
+        if stderr:
+            stderr_redirect = None
+        else:
+            logger.debug("Opening stderr_redirect to /dev/null")
+            stderr_redirect = open(os.devnull, 'w')
+        logger.debug("Running {}".format(cmd))
         try:
-            if not limit:
-                subprocess.run(shlex.split(cmd), check=True)
-            else:
-                subprocess.run(["cpulimit", "-l 75", "-m", "-z", "-f", "--"] + shlex.split(cmd), check=True)
+            subprocess.run(shlex.split(cmd), check=True, stdout=stdout_redirect, stderr=stderr_redirect)
         except subprocess.CalledProcessError:
              logger.error("\"{}\" subprocess failed!".format(cmd), exc_info=True)
+        
+        if stdout_redirect:
+            logger.debug("Closing stdout_redirect")
+            stdout_redirect.close()
+        if stderr_redirect:
+            logger.debug("Closing stderr_redirect")
+            stderr_redirect.close()
 
     @staticmethod
     def _set_config():
@@ -69,7 +71,7 @@ class Build(object):
         dict
             A dictonary contaning settings
         """
-        logger.info("Creating config")
+        logger.debug("Creating config")
 
         class_dict = {}
         default_path = os.path.dirname(os.path.realpath(__file__)) + "/default_conf.yml"

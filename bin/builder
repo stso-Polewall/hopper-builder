@@ -4,12 +4,10 @@ from typing import Any
 
 import logging
 import argparse
-
 import time
-import random
+import pkg_resources
 
 import progressbar
-
 from builder import Hw, Sw
 
 
@@ -22,6 +20,8 @@ def parse_args() -> Any:
         Object contaning argument variables
     """
     parser = argparse.ArgumentParser()
+    parser.add_argument("-v", "--version", action="version", version=pkg_resources.require("Hopper-Builder")[0].version)
+    parser.add_argument("-V", "--verbose", action="store_true")
     parser.add_argument('--clean', action="store_true")
     parser.add_argument('--pull', action="store_true")
     parser.add_argument('module')
@@ -29,11 +29,17 @@ def parse_args() -> Any:
 
 
 def main():
-    progressbar.streams.wrap_stderr()
-    logging.basicConfig(level=logging.INFO)
     arguments = parse_args()
+
+    progressbar.streams.wrap_stderr()
+    if arguments.verbose:
+        logging.basicConfig(format='%(asctime)s [%(levelname)s] %(module)s.%(funcName)s: %(message)s', level=logging.DEBUG)
+    else:
+        logging.basicConfig(format='%(message)s', level=logging.INFO)
+
     with progressbar.ProgressBar(max_value=3, redirect_stdout=True) as progress:
         progress.update(0)
+        time.sleep(2)
         # =========================
         logging.debug("Creating instance of Hw")
         hw_build = Hw(arguments.module)
@@ -47,7 +53,7 @@ def main():
         progress += 1  # Finished Hw
         # =========================
         logging.debug("Creating instance for Sw")
-        sw_build = Sw(argparse.module)
+        sw_build = Sw(arguments.module)
         if sw_build.is_enabled():
             sw_build.build_sw()
         else:
