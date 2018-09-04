@@ -149,6 +149,19 @@ class Hw(Build):
         self._cwd_to_base()
         logger.info("Finished Hardware Build")
 
+    def is_enabled(self) -> bool:
+        """Should this be run based on current configs
+
+        Returns
+        -------
+        bool
+            Returns True if class should be used in build
+        """
+        if self.config['modules'][self.module]['hw']:
+            return True
+        else:
+            return False
+
     def _set_env(self) -> None:
         """Adds Vivado to PATH"""
         logger.debug("Setting envirotment PATH")
@@ -169,3 +182,16 @@ class Sw(Build):
         self._proc_start("bash buildAll")
         self._cwd_to_base()
         logger.info("Finished Software Build")
+
+    def is_enabled(self) -> bool:
+        """Should this be run based on current configs
+
+        Returns
+        -------
+        bool
+            Returns True if class should be used in build
+        """
+        if self.config['modules'][self.module]['sw']:
+            return True
+        else:
+            return False
