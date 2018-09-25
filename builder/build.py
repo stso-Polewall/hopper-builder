@@ -13,6 +13,12 @@ from pprint import pformat
 logger = logging.getLogger(__name__)
 
 
+DEFCON = 'settings:\n' \
+         '    project: "~/Documents/StreetHopper"\n' \
+         '    config:  "~/Documents/StreetHopper/config.yml"\n\n' \
+         'modules: \n'
+
+
 class Build(object):
     config = {}
 
@@ -87,7 +93,8 @@ class Build(object):
         # Create Default user config if missing
         if not os.path.isfile(user_path):
                     logger.debug("Adding default user config")
-                    shutil.copyfile(default_path, user_path)
+                    with open(user_path, 'w') as f:
+                        f.write(DEFCON)
 
         # Open and create user dictonary
         try:
