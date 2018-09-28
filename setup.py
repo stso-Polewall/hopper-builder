@@ -3,9 +3,10 @@
 from setuptools import setup
 
 setup(name="Hopper-Builder",
-      version="0.0.1",
+      version="1.0.0",
       description="Automate Vivado build of hopper",
       author="Stian Solli",
+      author_email="stian.solli@polewall.com",
       url="https://github.com/stso-Polewall/hopper-builder",
       license="Other/Proprietary",
       scripts=["bin/builder"],
@@ -13,10 +14,9 @@ setup(name="Hopper-Builder",
       python_requires=">=3.5",
       install_requires=[
           "PyYAML >= 3.13",
-          "progressbar2 >= 3.38",
       ],
       classifiers=[
-          "Development Status :: 3 - Alpha",
+          "Development Status :: 5 - Production/Stable",
           "License :: Other/Proprietary License",
           "Natural Language :: English",
           "Environment :: Console",

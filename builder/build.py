@@ -19,9 +19,19 @@ DEFCON = 'settings:\n' \
 
 
 class Build(object):
+    """
+    Attributes
+    ----------
+    config : dic
+        global configuration diconary
+    module : str
+        the module to build
+    verbose : int
+        verboseness (not used)
+    """
     config = {}
 
-    def __init__(self, module, verbose=False):
+    def __init__(self, module, verbose=0):
         self.module = module.lower()
         self.verbose = verbose
 
@@ -37,18 +47,24 @@ class Build(object):
 
         self._cwd_to_base()
 
-    def _list_modules(self):
+    def _list_modules(self) -> None:
+        """Print avaiable modules to screen"""
         modules = [*self.config['modules']]
         modules.sort()
         print("Available modules: {}".format(", ".join(modules).lower()))
 
-
-    def _cwd_to_base(self):
+    def _cwd_to_base(self) -> None:
+        """Change directory back to root of build code"""
         os.chdir(os.path.expanduser(self.config['settings']['project']))
         logger.debug("Setting cwd to {}".format(os.getcwd()))
 
     def _proc_start(self, cmd) -> None:
         """Runs command with subprocess
+
+        Parameters
+        ----------
+        cmd : str
+            program with arguments to run with subprocess
 
         Raises
         ------
@@ -143,10 +159,20 @@ class Build(object):
 
 
 class Hw(Build):
+    """A class used to build hardware code
+
+    Methods
+    -------
+    build_hw( )
+        builds hardware component
+    is_enabled( )
+        checks if class is needed for module
+    """
     def __init__(self, module, verbose=False):
         super().__init__(module, verbose)
 
     def build_hw(self) -> None:
+        """Builds hardware component of module"""
         logger.info("Starting Hardware Build")
         # Change directory to hwpath
         os.chdir(self.config['modules'][self.module]['hwpath'])
@@ -189,10 +215,20 @@ class Hw(Build):
 
 
 class Sw(Build):
+    """A class used to build software code
+
+    Methods
+    -------
+    build_hw( )
+        builds software component
+    is_enabled( )
+        checks if class is needed for module 
+    """
     def __init__(self, module, verbose=False):
         super().__init__(module, verbose)
 
-    def build_sw(self):
+    def build_sw(self) -> None:
+        """Builds software component of module"""
         logger.info("Starting Software Build")
         os.chdir(self.config['modules'][self.module]['swpath'])
         logger.debug("Setting cwd to {}".format(os.getcwd()))
