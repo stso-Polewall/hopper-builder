@@ -6,7 +6,6 @@ import logging
 import os
 import shlex
 import subprocess
-import shutil
 import yaml
 from pprint import pformat
 
@@ -56,11 +55,12 @@ class Build(object):
         subprocess.CalledProcessError
             If process returns a non zero value
         """
-        if self.verbose:
-            stdout = None
-        else:
-            logger.debug("Opening stdout to /dev/null")
-            stdout = open(os.devnull, 'w')
+        #if self.verbose:
+        #    stdout = None
+        #else:
+        #    logger.debug("Opening stdout to /dev/null")
+        #    stdout = open(os.devnull, 'w')
+        stdout = None # Always print output
 
         logger.debug("Running {}".format(cmd))
         try:

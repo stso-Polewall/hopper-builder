@@ -4,10 +4,8 @@ from typing import Any
 
 import logging
 import argparse
-import time
 import pkg_resources
 
-import progressbar
 from builder import Hw, Sw
 
 
@@ -21,21 +19,23 @@ def parse_args() -> Any:
     """
     parser = argparse.ArgumentParser()
     parser.add_argument("-v", "--version", action="version", version=pkg_resources.require("Hopper-Builder")[0].version)
-    parser.add_argument("-V", "--verbose", action="store_true")
-    parser.add_argument('--clean', action="store_true")
-    parser.add_argument('--pull', action="store_true")
-    parser.add_argument('module')
+    parser.add_argument("-V", action='count', help="increase verbosity")
+    parser.add_argument('--clean', action="store_true", help="Function not implemented")
+    parser.add_argument('--pull', action="store_true", help="Function not implemented")
+    parser.add_argument('module', help="Name of module to build")
+
     return parser.parse_args()
 
 
 def main():
     arguments = parse_args()
 
-    progressbar.streams.wrap_stderr()
-    if arguments.verbose:
-        logging.basicConfig(format='%(asctime)s [%(levelname)s] %(module)s.%(funcName)s: %(message)s', level=logging.DEBUG)
+    max_level = 20
+
+    if arguments.verbose is None or arguments.verbose == 0:
+        logging.basicConfig(format='[%(levelname)s] %(message)s', level=max_level)
     else:
-        logging.basicConfig(format='%(message)s', level=logging.INFO)
+        logging.basicConfig(format='%(asctime)s [%(levelname)s] %(module)s.%(funcName)s: %(message)s', level=max_level - arguments.verbose * 10)
 
     logging.debug("Creating instance of Hw")
     hw_build = Hw(arguments.module, arguments.verbose)
@@ -59,8 +59,7 @@ def main():
     # =========================
     logging.info("Build Finished!")
     # =========================
-    
-        
+
 
 if __name__ == "__main__":
     try:
